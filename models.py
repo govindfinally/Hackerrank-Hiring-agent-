@@ -319,6 +319,15 @@ class GeminiProvider:
         genai.configure(api_key=api_key)
         self.client = genai
 
+    class GeminiProvider:
+    """Google Gemini API provider implementation."""
+
+    def __init__(self, api_key: str):
+        import google.generativeai as genai
+
+        genai.configure(api_key=api_key)
+        self.client = genai
+
     def chat(
         self,
         model: str,
@@ -347,7 +356,22 @@ class GeminiProvider:
             gemini_messages.append({"role": role, "parts": [msg["content"]]})
 
         # Send the chat request
-        response = gemini_model.generate_content(gemini_messages)
-
-        # Convert Gemini response to Ollama-like format for compatibility
-        return {"message": {"role": "assistant", "content": response.text}}
+        try:
+            response = gemini_model.generate_content(gemini_messages)
+            return {"message": {"role": "assistant", "content": response.text}}
+        except Exception as e:
+            # Handle quota/exhausted API
+            error_msg = str(e)
+            if "limit" in error_msg.lower():
+                print("Free tier has only 2 queries per minute. Please try again later or upgrade your plan.")
+            if "quota" in error_msg.lower() or "limit" in error_msg.lower():
+                return {
+                    "message": {
+                        "role": "assistant",
+                        "content": "⚠️ Free-tier API limit reached. Please try later or upgrade your plan."
+                    }
+                }
+            
+            else:
+                # For other errors, re-raise or handle differently
+                raise
