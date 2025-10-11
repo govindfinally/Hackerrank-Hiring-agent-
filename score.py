@@ -307,6 +307,7 @@ def main(pdf_path):
             if score.deductions and score.deductions.total > 0:
                 f.write(f"Deductions: -{score.deductions.total}\n")  
             f.write("total scoreobtianed: "+str(score)+"\n")   
+                f.write(f"Deductions: -{score.deductions.total}\n")     
     return score
 
 
